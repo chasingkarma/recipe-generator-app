@@ -326,17 +326,19 @@
                     dietaryInput.value = '';
                 }
 
-                // Clear selected ingredients display
-                this.updateSelectedIngredientsDisplay();
-                this.updateFindRecipesButton();
-
-                // Show ingredients section
-                this.showIngredientsSection();
+                // Re-render ingredients to auto-select spices again
+                this.renderIngredients();
             }
 
             renderIngredients() {
                 const grid = document.getElementById('ingredients-grid');
                 grid.innerHTML = '';
+
+                // Common spices to auto-select
+                const autoSelectSpices = [
+                    "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Cumin Powder", 
+                    "Garam Masala", "Black Pepper", "Cumin Seeds", "Asafoetida", "Cardamom"
+                ];
 
                 Object.entries(this.ingredients).forEach(([category, ingredients]) => {
                     const categoryDiv = document.createElement('div');
@@ -354,6 +356,12 @@
                         checkbox.type = 'checkbox';
                         checkbox.id = `ingredient-${ingredient}`;
                         checkbox.value = ingredient;
+                        
+                        // Auto-select common spices
+                        if (autoSelectSpices.includes(ingredient)) {
+                            checkbox.checked = true;
+                            this.selectedIngredients.push(ingredient);
+                        }
                         
                         const label = document.createElement('label');
                         label.htmlFor = `ingredient-${ingredient}`;
@@ -380,6 +388,10 @@
                     
                     grid.appendChild(categoryDiv);
                 });
+                
+                // Update the display after auto-selecting spices
+                this.updateSelectedIngredientsDisplay();
+                this.updateFindRecipesButton();
             }
 
             handleIngredientSelection(ingredient, isSelected) {
@@ -434,12 +446,12 @@
 
             updateFindRecipesButton() {
                 const button = document.getElementById('find-recipes-btn');
-                button.disabled = this.selectedIngredients.length < 2;
+                button.disabled = this.selectedIngredients.length < 3;
             }
 
             findRecipes() {
-                if (this.selectedIngredients.length < 2) {
-                    alert('Please select at least 2 ingredients to find recipes.');
+                if (this.selectedIngredients.length < 3) {
+                    alert('Please select at least 3 ingredients to find recipes. Try adding more vegetables, proteins, or spices.');
                     return;
                 }
 
@@ -453,7 +465,7 @@
                     this.recipes = this.generateRecipesFromIngredients(this.selectedIngredients);
                     
                     if (this.recipes.length === 0) {
-                        alert('No recipes found with the selected ingredients. Try selecting different ingredients.');
+                        alert('No recipes found with the selected ingredients. Try selecting different ingredients or adding more vegetables and proteins.');
                         this.showLoading(false);
                         return;
                     }
@@ -468,13 +480,18 @@
                 const generatedRecipes = [];
                 const recipeTypes = Object.keys(this.recipeTemplates);
                 
-                // Generate 3-5 unique recipes based on selected ingredients
-                const numRecipes = Math.min(5, Math.max(3, Math.floor(selectedIngredients.length / 2)));
+                // Only generate recipes if we have enough selected ingredients
+                if (selectedIngredients.length < 3) {
+                    return [];
+                }
+                
+                // Generate 2-4 recipes based on selected ingredients
+                const numRecipes = Math.min(4, Math.max(2, Math.floor(selectedIngredients.length / 3)));
                 
                 for (let i = 0; i < numRecipes; i++) {
                     const recipeType = recipeTypes[Math.floor(Math.random() * recipeTypes.length)];
                     const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
-                    if (recipe) {
+                    if (recipe && recipe.ingredients.length >= 4) {
                         generatedRecipes.push(recipe);
                     }
                 }
@@ -489,7 +506,7 @@
                 // Determine recipe ingredients based on template and available ingredients
                 const recipeIngredients = [];
                 
-                // Add base ingredients if available
+                // Add base ingredients if available in selected ingredients
                 template.baseIngredients.forEach(ingredient => {
                     if (availableIngredients.includes(ingredient)) {
                         recipeIngredients.push(ingredient);
@@ -497,25 +514,17 @@
                     }
                 });
                 
-                // Add optional ingredients (2-4 items)
-                const numOptional = Math.min(3, availableIngredients.length);
+                // Add optional ingredients from selected ingredients only
+                const numOptional = Math.min(4, availableIngredients.length);
                 const shuffledOptional = this.shuffleArray([...availableIngredients]);
                 
                 for (let i = 0; i < numOptional && i < shuffledOptional.length; i++) {
                     recipeIngredients.push(shuffledOptional[i]);
                 }
                 
-                // Add some spices if not enough ingredients
+                // Only create recipe if we have enough ingredients (at least 4)
                 if (recipeIngredients.length < 4) {
-                    const availableSpices = selectedIngredients.filter(ingredient => 
-                        this.ingredients.spices.includes(ingredient)
-                    );
-                    const spicesToAdd = Math.min(2, availableSpices.length);
-                    for (let i = 0; i < spicesToAdd; i++) {
-                        if (!recipeIngredients.includes(availableSpices[i])) {
-                            recipeIngredients.push(availableSpices[i]);
-                        }
-                    }
+                    return null;
                 }
                 
                 // Generate recipe name
