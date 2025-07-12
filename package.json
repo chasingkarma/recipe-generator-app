@@ -1,0 +1,8 @@
+{
+  "name": "recipe-generator-app",
+  "version": "1.0.0",
+  "description": "Vegetarian recipe generator app",
+  "scripts": {
+    "build": "echo 'Build completed'"
+  }
+} 
