@@ -141,6 +141,79 @@
                         "Garnish with fresh coriander leaves and serve hot."
                     ]
                 },
+                "poha": {
+                    baseIngredients: ["Poha", "Onion", "Turmeric Powder"],
+                    optionalIngredients: ["Peas", "Carrot", "Bell Pepper", "Potato", "Peanuts"],
+                    spices: ["Mustard Seeds", "Cumin Seeds", "Curry Leaves", "Asafoetida"],
+                    cookingSteps: [
+                        "Rinse poha in water and drain. Keep aside for 10 minutes.",
+                        "Heat oil in a pan and add mustard seeds. Let them crackle.",
+                        "Add cumin seeds, curry leaves, and asafoetida. Cook for 30 seconds.",
+                        "Add finely chopped onions and cook until translucent.",
+                        "Add turmeric powder and salt. Mix well.",
+                        "Add vegetables (peas, carrots, bell pepper) and cook for 2-3 minutes.",
+                        "Add poha and mix gently. Cook for 2-3 minutes on low heat.",
+                        "Garnish with fresh coriander and serve hot."
+                    ]
+                },
+                "upma": {
+                    baseIngredients: ["Semolina", "Onion", "Ginger"],
+                    optionalIngredients: ["Carrot", "Bell Pepper", "Peas", "Tomato"],
+                    spices: ["Mustard Seeds", "Cumin Seeds", "Curry Leaves", "Asafoetida"],
+                    cookingSteps: [
+                        "Dry roast semolina in a pan until light golden. Keep aside.",
+                        "Heat oil in a pan and add mustard seeds. Let them crackle.",
+                        "Add cumin seeds, curry leaves, and asafoetida. Cook for 30 seconds.",
+                        "Add finely chopped onions and ginger. Cook until onions are translucent.",
+                        "Add vegetables and cook for 2-3 minutes.",
+                        "Add water (1:2 ratio) and bring to boil.",
+                        "Add roasted semolina slowly while stirring continuously.",
+                        "Cook on low heat for 3-4 minutes until done. Serve hot."
+                    ]
+                },
+                "paratha": {
+                    baseIngredients: ["Whole Wheat Flour", "Oil"],
+                    optionalIngredients: ["Potato", "Paneer", "Spinach", "Cauliflower"],
+                    spices: ["Cumin Seeds", "Red Chili Powder", "Garam Masala"],
+                    cookingSteps: [
+                        "Mix whole wheat flour with water to make a soft dough. Rest for 20 minutes.",
+                        "For stuffed paratha: Mash potatoes/paneer with spices and salt.",
+                        "Divide dough into equal portions and roll into small circles.",
+                        "Place stuffing in center and bring edges together to seal.",
+                        "Roll out gently into a circle, dusting with flour as needed.",
+                        "Heat a tawa/griddle and cook paratha with oil on both sides.",
+                        "Cook until golden brown spots appear. Serve hot with pickle or yogurt."
+                    ]
+                },
+                "idli": {
+                    baseIngredients: ["Urad Dal", "Rice", "Fenugreek Seeds"],
+                    optionalIngredients: ["Carrot", "Bell Pepper", "Peas"],
+                    spices: ["Mustard Seeds", "Curry Leaves", "Asafoetida"],
+                    cookingSteps: [
+                        "Soak urad dal, rice, and fenugreek seeds separately for 6-8 hours.",
+                        "Grind urad dal to a smooth paste. Grind rice to a coarse paste.",
+                        "Mix both pastes and let ferment overnight in a warm place.",
+                        "Add salt and mix well. Batter should be thick but pourable.",
+                        "Grease idli molds and pour batter. Steam for 10-12 minutes.",
+                        "For vegetable idli: Add finely chopped vegetables to batter before steaming.",
+                        "Serve hot with coconut chutney and sambar."
+                    ]
+                },
+                "dosa": {
+                    baseIngredients: ["Urad Dal", "Rice", "Fenugreek Seeds"],
+                    optionalIngredients: ["Potato", "Onion", "Carrot"],
+                    spices: ["Mustard Seeds", "Cumin Seeds", "Curry Leaves"],
+                    cookingSteps: [
+                        "Soak urad dal, rice, and fenugreek seeds separately for 6-8 hours.",
+                        "Grind urad dal to a smooth paste. Grind rice to a fine paste.",
+                        "Mix both pastes and let ferment overnight in a warm place.",
+                        "Add salt and mix well. Batter should be thin and flowing.",
+                        "Heat a tawa and pour batter in circular motion to make thin dosa.",
+                        "Drizzle oil around edges and cook until crispy.",
+                        "For masala dosa: Add potato-onion filling before folding.",
+                        "Serve hot with coconut chutney and sambar."
+                    ]
+                },
                 "stir-fry": {
                     baseIngredients: ["Ginger", "Garlic"],
                     optionalIngredients: ["Bell Pepper", "Carrot", "Mushroom", "Green Beans", "Tofu"],
@@ -205,6 +278,11 @@
             // Recipe names for dynamic generation
             recipeNames: {
                 "curry": ["{protein} Curry", "{vegetable} Masala", "{protein} {spice} Curry", "Mixed Vegetable Curry"],
+                "poha": ["Kanda Poha", "Vegetable Poha", "{vegetable} Poha", "Mixed Vegetable Poha"],
+                "upma": ["{vegetable} Upma", "Mixed Vegetable Upma", "Spiced Upma", "Quick Upma"],
+                "paratha": ["{vegetable} Paratha", "Aloo Paratha", "Paneer Paratha", "Mixed Vegetable Paratha"],
+                "idli": ["{vegetable} Idli", "Mixed Vegetable Idli", "Spiced Idli", "Quick Idli"],
+                "dosa": ["{vegetable} Dosa", "Masala Dosa", "Mixed Vegetable Dosa", "Quick Dosa"],
                 "stir-fry": ["{vegetable} Stir Fry", "Asian {vegetable} Stir Fry", "Quick {vegetable} Stir Fry", "Mixed Vegetable Stir Fry"],
                 "soup": ["{vegetable} Soup", "Hearty {vegetable} Soup", "Spiced {vegetable} Soup", "Mixed Vegetable Soup"],
                 "rice": ["{vegetable} Rice", "Spiced {vegetable} Rice", "Mixed Vegetable Rice", "Aromatic {vegetable} Rice"],
@@ -580,6 +658,11 @@
             generateCookingTime(recipeType, numIngredients) {
                 const baseTime = {
                     'curry': 25,
+                    'poha': 15,
+                    'upma': 20,
+                    'paratha': 30,
+                    'idli': 45,
+                    'dosa': 40,
                     'stir-fry': 15,
                     'soup': 30,
                     'rice': 35,
@@ -740,4 +823,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
