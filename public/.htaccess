@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Serve index.html for the root URL
+RewriteRule ^$ index.html [L]
+
+# Route API calls to index.php
+RewriteRule ^api/(.*)$ index.php?action=$1 [QSA,L]
+
+# Handle direct PHP calls
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L] 

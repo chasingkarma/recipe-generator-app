@@ -1,0 +1,16 @@
+{
+  "vegetables": [
+    "Onion", "Tomato", "Potato", "Carrot", "Bell Pepper", "Spinach", "Cauliflower", "Green Beans", "Peas", "Mushroom", 
+    "Eggplant", "Ginger", "Garlic", "Coriander Leaves", "Mint Leaves", "Curry Leaves"
+  ],
+  "spices": [
+    "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Cumin Powder", "Garam Masala", "Black Pepper", 
+    "Cumin Seeds", "Mustard Seeds", "Fenugreek Seeds", "Asafoetida", "Cardamom", "Cinnamon", "Cloves", "Bay Leaves"
+  ],
+  "grains": [
+    "Basmati Rice", "Brown Rice", "Quinoa", "Whole Wheat Flour", "Semolina", "Poha", "Puffed Rice"
+  ],
+  "protein": [
+    "Paneer", "Tofu", "Chickpeas", "Masoor Dal", "Toor Dal", "Chana Dal", "Urad Dal", "Kidney Beans", "Lentils"
+  ]
+} 

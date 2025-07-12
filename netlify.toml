@@ -1,0 +1,8 @@
+[build]
+  publish = "public"
+  command = "cp static-index.html index.html"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
