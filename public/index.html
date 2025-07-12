@@ -106,6 +106,586 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script>
+        // Embedded data for static version
+        const APP_DATA = {
+            ingredients: {
+                "vegetables": [
+                    "Onion", "Tomato", "Potato", "Carrot", "Bell Pepper", "Spinach", "Cauliflower", "Green Beans", "Peas", "Mushroom", 
+                    "Eggplant", "Ginger", "Garlic", "Coriander Leaves", "Mint Leaves", "Curry Leaves"
+                ],
+                "spices": [
+                    "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Cumin Powder", "Garam Masala", "Black Pepper", 
+                    "Cumin Seeds", "Mustard Seeds", "Fenugreek Seeds", "Asafoetida", "Cardamom", "Cinnamon", "Cloves", "Bay Leaves"
+                ],
+                "grains": [
+                    "Basmati Rice", "Brown Rice", "Quinoa", "Whole Wheat Flour", "Semolina", "Poha", "Puffed Rice"
+                ],
+                "protein": [
+                    "Paneer", "Tofu", "Chickpeas", "Masoor Dal", "Toor Dal", "Chana Dal", "Urad Dal", "Kidney Beans", "Lentils"
+                ]
+            },
+            recipes: [
+                {
+                    "id": 1,
+                    "name": "Paneer Butter Masala",
+                    "time": "30 minutes",
+                    "ingredients": ["Paneer", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Garam Masala", "Butter", "Cream", "Coriander Leaves"],
+                    "instructions": [
+                        "Heat oil in a pan and add finely chopped onions. Sauté until golden brown.",
+                        "Add ginger-garlic paste and cook for 2 minutes until fragrant.",
+                        "Add chopped tomatoes and cook until they become soft and mushy.",
+                        "Add turmeric powder, red chili powder, coriander powder, and salt. Cook for 2 minutes.",
+                        "Blend the mixture to a smooth paste using a blender.",
+                        "Return the paste to the pan and add butter. Cook for 2-3 minutes.",
+                        "Add paneer cubes and cook for 5 minutes on low heat.",
+                        "Add garam masala and cream. Mix well and cook for 2 minutes.",
+                        "Garnish with fresh coriander leaves and serve hot with naan or rice."
+                    ]
+                },
+                {
+                    "id": 2,
+                    "name": "Thai Red Curry with Tofu",
+                    "time": "25 minutes",
+                    "ingredients": ["Tofu", "Bell Pepper", "Bamboo Shoots", "Thai Red Curry Paste", "Coconut Milk", "Fish Sauce", "Palm Sugar", "Thai Basil", "Lime"],
+                    "instructions": [
+                        "Press tofu to remove excess water and cut into cubes.",
+                        "Heat oil in a wok and fry tofu until golden brown. Set aside.",
+                        "In the same wok, add red curry paste and cook for 1 minute until fragrant.",
+                        "Add coconut milk and bring to a gentle simmer.",
+                        "Add bell peppers and bamboo shoots. Cook for 3-4 minutes.",
+                        "Add fried tofu and cook for 2 minutes.",
+                        "Season with fish sauce, palm sugar, and lime juice.",
+                        "Garnish with Thai basil and serve hot with steamed rice."
+                    ]
+                },
+                {
+                    "id": 3,
+                    "name": "Quinoa Vegetable Stir Fry",
+                    "time": "20 minutes",
+                    "ingredients": ["Quinoa", "Broccoli", "Carrot", "Bell Pepper", "Ginger", "Garlic", "Soy Sauce", "Sesame Oil", "Sesame Seeds"],
+                    "instructions": [
+                        "Cook quinoa according to package instructions and set aside.",
+                        "Heat sesame oil in a large wok over high heat.",
+                        "Add minced ginger and garlic, stir-fry for 30 seconds.",
+                        "Add chopped vegetables (broccoli, carrot, bell pepper) and stir-fry for 3-4 minutes.",
+                        "Add cooked quinoa and soy sauce. Mix well.",
+                        "Cook for 2-3 minutes until everything is well combined.",
+                        "Garnish with sesame seeds and serve hot."
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "Dal Makhani",
+                    "time": "45 minutes",
+                    "ingredients": ["Black Lentils", "Kidney Beans", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Garam Masala", "Butter", "Cream"],
+                    "instructions": [
+                        "Soak black lentils and kidney beans overnight or for 6 hours.",
+                        "Pressure cook lentils and beans with salt and turmeric until soft.",
+                        "Heat oil in a pan and add finely chopped onions. Sauté until golden.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add chopped tomatoes and cook until soft.",
+                        "Add red chili powder and cook for 1 minute.",
+                        "Add cooked lentils and beans. Mix well and simmer for 10 minutes.",
+                        "Add butter, cream, and garam masala. Cook for 5 minutes.",
+                        "Garnish with fresh coriander and serve with rice or naan."
+                    ]
+                },
+                {
+                    "id": 5,
+                    "name": "Vegetable Biryani",
+                    "time": "40 minutes",
+                    "ingredients": ["Basmati Rice", "Mixed Vegetables", "Onion", "Ginger", "Garlic", "Biryani Masala", "Saffron", "Mint Leaves", "Coriander Leaves", "Ghee"],
+                    "instructions": [
+                        "Soak basmati rice for 30 minutes and saffron in warm milk.",
+                        "Heat ghee in a heavy-bottomed pan and add whole spices.",
+                        "Add sliced onions and cook until golden brown.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add mixed vegetables and biryani masala. Cook for 5 minutes.",
+                        "Add soaked rice and saffron milk. Mix gently.",
+                        "Add water (1:1.5 ratio) and bring to boil.",
+                        "Cover and cook on low heat for 20 minutes until rice is done.",
+                        "Garnish with mint and coriander leaves. Serve hot."
+                    ]
+                },
+                {
+                    "id": 6,
+                    "name": "Chickpea Curry",
+                    "time": "25 minutes",
+                    "ingredients": ["Chickpeas", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Coriander Powder", "Cumin Powder", "Garam Masala", "Coriander Leaves"],
+                    "instructions": [
+                        "Heat oil in a pan and add cumin seeds. Let them crackle.",
+                        "Add finely chopped onions and cook until translucent.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add chopped tomatoes and cook until soft.",
+                        "Add turmeric powder, coriander powder, and salt. Cook for 2 minutes.",
+                        "Add cooked chickpeas and mix well.",
+                        "Add water and simmer for 10 minutes.",
+                        "Add garam masala and cook for 2 minutes.",
+                        "Garnish with fresh coriander and serve with rice or bread."
+                    ]
+                },
+                {
+                    "id": 7,
+                    "name": "Mushroom Masala",
+                    "time": "20 minutes",
+                    "ingredients": ["Mushroom", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Garam Masala", "Coriander Leaves"],
+                    "instructions": [
+                        "Clean and slice mushrooms. Keep aside.",
+                        "Heat oil in a pan and add finely chopped onions.",
+                        "Sauté until onions become translucent.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add chopped tomatoes and cook until soft.",
+                        "Add turmeric powder, red chili powder, coriander powder, and salt.",
+                        "Add sliced mushrooms and cook for 5-7 minutes.",
+                        "Add garam masala and cook for 2 minutes.",
+                        "Garnish with fresh coriander and serve hot."
+                    ]
+                },
+                {
+                    "id": 8,
+                    "name": "Spinach and Paneer Curry",
+                    "time": "25 minutes",
+                    "ingredients": ["Spinach", "Paneer", "Onion", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Garam Masala", "Cream"],
+                    "instructions": [
+                        "Blanch spinach in hot water for 2 minutes and blend to a smooth paste.",
+                        "Heat oil in a pan and add finely chopped onions.",
+                        "Sauté until onions become golden brown.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add spinach paste and cook for 5 minutes.",
+                        "Add turmeric powder, red chili powder, and salt.",
+                        "Add paneer cubes and cook for 3-4 minutes.",
+                        "Add garam masala and cream. Mix well.",
+                        "Cook for 2 minutes and serve hot with rice or roti."
+                    ]
+                },
+                {
+                    "id": 9,
+                    "name": "Vegetable Stir Fry",
+                    "time": "15 minutes",
+                    "ingredients": ["Broccoli", "Carrot", "Bell Pepper", "Mushroom", "Ginger", "Garlic", "Soy Sauce", "Sesame Oil", "Sesame Seeds"],
+                    "instructions": [
+                        "Cut all vegetables into similar-sized pieces.",
+                        "Heat sesame oil in a wok over high heat.",
+                        "Add minced ginger and garlic, stir-fry for 30 seconds.",
+                        "Add vegetables starting with the hardest ones (carrots, broccoli).",
+                        "Stir-fry for 2-3 minutes, then add softer vegetables.",
+                        "Add soy sauce and continue stir-frying for 2-3 minutes.",
+                        "Vegetables should be crisp-tender, not mushy.",
+                        "Garnish with sesame seeds and serve immediately."
+                    ]
+                },
+                {
+                    "id": 10,
+                    "name": "Lentil Soup",
+                    "time": "30 minutes",
+                    "ingredients": ["Red Lentils", "Onion", "Carrot", "Ginger", "Garlic", "Turmeric Powder", "Cumin Seeds", "Coriander Leaves", "Lemon"],
+                    "instructions": [
+                        "Rinse red lentils thoroughly and set aside.",
+                        "Heat oil in a pot and add cumin seeds. Let them crackle.",
+                        "Add finely chopped onions and cook until translucent.",
+                        "Add ginger-garlic paste and cook for 2 minutes.",
+                        "Add chopped carrots and cook for 2 minutes.",
+                        "Add lentils, turmeric powder, and salt.",
+                        "Add water and bring to boil. Simmer for 20 minutes.",
+                        "Blend partially for a creamy texture.",
+                        "Garnish with coriander leaves and lemon juice. Serve hot."
+                    ]
+                }
+            ]
+        };
+
+        class RecipeApp {
+            constructor() {
+                this.selectedIngredients = [];
+                this.recipes = [];
+                this.currentRecipeIndex = 0;
+                this.ingredients = APP_DATA.ingredients;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.renderIngredients();
+            }
+
+            setupEventListeners() {
+                // Find recipes button
+                document.getElementById('find-recipes-btn').addEventListener('click', () => {
+                    this.findRecipes();
+                });
+
+                // Back to ingredients button
+                document.getElementById('back-to-ingredients').addEventListener('click', () => {
+                    this.showIngredientsSection();
+                });
+
+                // Back to recipes button
+                document.getElementById('back-to-recipes').addEventListener('click', () => {
+                    this.showRecipesSection();
+                });
+
+                // Start over button
+                document.getElementById('start-over-btn').addEventListener('click', () => {
+                    this.startOver();
+                });
+
+                // Additional ingredients input handlers
+                this.setupAdditionalIngredientsHandlers();
+            }
+
+            setupAdditionalIngredientsHandlers() {
+                const additionalInputs = [
+                    'additional-vegetables',
+                    'additional-spices', 
+                    'additional-grains',
+                    'additional-protein'
+                ];
+
+                additionalInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.addEventListener('blur', () => {
+                            this.handleAdditionalIngredients();
+                        });
+                    }
+                });
+            }
+
+            handleAdditionalIngredients() {
+                const additionalInputs = [
+                    'additional-vegetables',
+                    'additional-spices',
+                    'additional-grains', 
+                    'additional-protein'
+                ];
+
+                additionalInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input && input.value.trim()) {
+                        const ingredients = input.value.split(',').map(item => item.trim()).filter(item => item);
+                        ingredients.forEach(ingredient => {
+                            if (!this.selectedIngredients.includes(ingredient)) {
+                                this.selectedIngredients.push(ingredient);
+                            }
+                        });
+                    }
+                });
+
+                this.updateSelectedIngredientsDisplay();
+                this.updateFindRecipesButton();
+            }
+
+            startOver() {
+                // Clear all selections
+                this.selectedIngredients = [];
+                
+                // Clear checkboxes
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+
+                // Clear additional ingredients inputs
+                const additionalInputs = [
+                    'additional-vegetables',
+                    'additional-spices',
+                    'additional-grains',
+                    'additional-protein'
+                ];
+
+                additionalInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.value = '';
+                    }
+                });
+
+                // Clear dietary restrictions
+                const dietaryInput = document.getElementById('dietary-restrictions');
+                if (dietaryInput) {
+                    dietaryInput.value = '';
+                }
+
+                // Clear selected ingredients display
+                this.updateSelectedIngredientsDisplay();
+                this.updateFindRecipesButton();
+
+                // Show ingredients section
+                this.showIngredientsSection();
+            }
+
+            renderIngredients() {
+                const grid = document.getElementById('ingredients-grid');
+                grid.innerHTML = '';
+
+                Object.entries(this.ingredients).forEach(([category, ingredients]) => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'ingredient-category';
+                    
+                    const categoryTitle = document.createElement('h3');
+                    categoryTitle.textContent = this.capitalizeFirst(category);
+                    categoryDiv.appendChild(categoryTitle);
+
+                    ingredients.forEach(ingredient => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'ingredient-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `ingredient-${ingredient}`;
+                        checkbox.value = ingredient;
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = `ingredient-${ingredient}`;
+                        label.textContent = ingredient;
+                        
+                        itemDiv.appendChild(checkbox);
+                        itemDiv.appendChild(label);
+                        
+                        // Add click event to the entire item
+                        itemDiv.addEventListener('click', (e) => {
+                            if (e.target.type !== 'checkbox') {
+                                checkbox.checked = !checkbox.checked;
+                            }
+                            this.handleIngredientSelection(ingredient, checkbox.checked);
+                        });
+                        
+                        // Add change event to checkbox
+                        checkbox.addEventListener('change', (e) => {
+                            this.handleIngredientSelection(ingredient, e.target.checked);
+                        });
+                        
+                        categoryDiv.appendChild(itemDiv);
+                    });
+                    
+                    grid.appendChild(categoryDiv);
+                });
+            }
+
+            handleIngredientSelection(ingredient, isSelected) {
+                if (isSelected) {
+                    if (!this.selectedIngredients.includes(ingredient)) {
+                        this.selectedIngredients.push(ingredient);
+                    }
+                } else {
+                    this.selectedIngredients = this.selectedIngredients.filter(item => item !== ingredient);
+                }
+                
+                this.updateSelectedIngredientsDisplay();
+                this.updateFindRecipesButton();
+            }
+
+            updateSelectedIngredientsDisplay() {
+                const container = document.getElementById('selected-ingredients-list');
+                container.innerHTML = '';
+                
+                this.selectedIngredients.forEach(ingredient => {
+                    const ingredientDiv = document.createElement('div');
+                    ingredientDiv.className = 'selected-ingredient';
+                    
+                    const text = document.createElement('span');
+                    text.textContent = ingredient;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.addEventListener('click', () => {
+                        this.removeIngredient(ingredient);
+                    });
+                    
+                    ingredientDiv.appendChild(text);
+                    ingredientDiv.appendChild(removeBtn);
+                    container.appendChild(ingredientDiv);
+                });
+            }
+
+            removeIngredient(ingredient) {
+                this.selectedIngredients = this.selectedIngredients.filter(item => item !== ingredient);
+                
+                // Uncheck the corresponding checkbox
+                const checkbox = document.getElementById(`ingredient-${ingredient}`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+                
+                this.updateSelectedIngredientsDisplay();
+                this.updateFindRecipesButton();
+            }
+
+            updateFindRecipesButton() {
+                const button = document.getElementById('find-recipes-btn');
+                button.disabled = this.selectedIngredients.length < 2;
+            }
+
+            findRecipes() {
+                if (this.selectedIngredients.length < 2) {
+                    alert('Please select at least 2 ingredients to find recipes.');
+                    return;
+                }
+
+                // Handle additional ingredients before searching
+                this.handleAdditionalIngredients();
+
+                this.showLoading(true);
+                
+                // Simulate loading delay
+                setTimeout(() => {
+                    this.recipes = this.findRecipesByIngredients(this.selectedIngredients);
+                    
+                    if (this.recipes.length === 0) {
+                        alert('No recipes found with the selected ingredients. Try selecting different ingredients.');
+                        this.showLoading(false);
+                        return;
+                    }
+                    
+                    this.showRecipesSection();
+                    this.renderRecipes();
+                    this.showLoading(false);
+                }, 1000);
+            }
+
+            findRecipesByIngredients(selectedIngredients) {
+                const matchingRecipes = [];
+                
+                APP_DATA.recipes.forEach(recipe => {
+                    const recipeIngredients = recipe.ingredients.map(ingredient => ingredient.toLowerCase());
+                    const selectedIngredientsLower = selectedIngredients.map(ingredient => ingredient.toLowerCase());
+                    
+                    let matchingCount = 0;
+                    selectedIngredientsLower.forEach(ingredient => {
+                        if (recipeIngredients.includes(ingredient)) {
+                            matchingCount++;
+                        }
+                    });
+                    
+                    // Recipe matches if it contains at least 2 selected ingredients
+                    if (matchingCount >= 2) {
+                        recipe.matchScore = matchingCount;
+                        matchingRecipes.push(recipe);
+                    }
+                });
+                
+                // Sort by match score (highest first)
+                matchingRecipes.sort((a, b) => b.matchScore - a.matchScore);
+                
+                return matchingRecipes;
+            }
+
+            renderRecipes() {
+                const container = document.getElementById('recipes-container');
+                container.innerHTML = '';
+                
+                this.recipes.forEach((recipe, index) => {
+                    const recipeCard = document.createElement('div');
+                    recipeCard.className = 'recipe-card';
+                    recipeCard.addEventListener('click', () => {
+                        this.showRecipeDetail(index);
+                    });
+                    
+                    recipeCard.innerHTML = `
+                        <h3>${recipe.name}</h3>
+                        <div class="time">
+                            <i class="fas fa-clock"></i>
+                            ${recipe.time}
+                        </div>
+                        <div class="ingredients">
+                            <strong>Ingredients:</strong> ${recipe.ingredients.slice(0, 5).join(', ')}${recipe.ingredients.length > 5 ? '...' : ''}
+                        </div>
+                    `;
+                    
+                    container.appendChild(recipeCard);
+                });
+            }
+
+            showRecipeDetail(index) {
+                this.currentRecipeIndex = index;
+                const recipe = this.recipes[index];
+                
+                const container = document.getElementById('recipe-detail-container');
+                container.innerHTML = `
+                    <h1 class="recipe-title">${recipe.name}</h1>
+                    <div class="recipe-time">
+                        <i class="fas fa-clock"></i>
+                        ${recipe.time}
+                    </div>
+                    
+                    <div class="recipe-ingredients">
+                        <h3>Ingredients</h3>
+                        <div class="ingredients-list">
+                            ${recipe.ingredients.map(ingredient => 
+                                `<div class="ingredient-tag">${ingredient}</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-instructions">
+                        <h3>Instructions</h3>
+                        <ol class="instructions-list">
+                            ${recipe.instructions.map(instruction => 
+                                `<li>${instruction}</li>`
+                            ).join('')}
+                        </ol>
+                    </div>
+                    
+                    <div class="recipe-navigation">
+                        <button class="btn btn-secondary nav-btn" id="prev-recipe" ${index === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <span>Recipe ${index + 1} of ${this.recipes.length}</span>
+                        <button class="btn btn-secondary nav-btn" id="next-recipe" ${index === this.recipes.length - 1 ? 'disabled' : ''}>
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add navigation event listeners
+                document.getElementById('prev-recipe').addEventListener('click', () => {
+                    if (this.currentRecipeIndex > 0) {
+                        this.showRecipeDetail(this.currentRecipeIndex - 1);
+                    }
+                });
+                
+                document.getElementById('next-recipe').addEventListener('click', () => {
+                    if (this.currentRecipeIndex < this.recipes.length - 1) {
+                        this.showRecipeDetail(this.currentRecipeIndex + 1);
+                    }
+                });
+                
+                this.showRecipeDetailSection();
+            }
+
+            showIngredientsSection() {
+                document.getElementById('ingredients-section').style.display = 'block';
+                document.getElementById('recipes-section').style.display = 'none';
+                document.getElementById('recipe-detail-section').style.display = 'none';
+            }
+
+            showRecipesSection() {
+                document.getElementById('ingredients-section').style.display = 'none';
+                document.getElementById('recipes-section').style.display = 'block';
+                document.getElementById('recipe-detail-section').style.display = 'none';
+            }
+
+            showRecipeDetailSection() {
+                document.getElementById('ingredients-section').style.display = 'none';
+                document.getElementById('recipes-section').style.display = 'none';
+                document.getElementById('recipe-detail-section').style.display = 'block';
+            }
+
+            showLoading(show) {
+                document.getElementById('loading').style.display = show ? 'flex' : 'none';
+            }
+
+            capitalizeFirst(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new RecipeApp();
+        });
+    </script>
 </body>
 </html> 
