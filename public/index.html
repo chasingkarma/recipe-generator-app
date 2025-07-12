@@ -107,7 +107,7 @@
     </div>
 
     <script>
-        // Embedded data for static version
+        // Dynamic recipe generation system
         const APP_DATA = {
             ingredients: {
                 "vegetables": [
@@ -125,174 +125,91 @@
                     "Paneer", "Tofu", "Chickpeas", "Masoor Dal", "Toor Dal", "Chana Dal", "Urad Dal", "Kidney Beans", "Lentils"
                 ]
             },
-            recipes: [
-                {
-                    "id": 1,
-                    "name": "Paneer Butter Masala",
-                    "time": "30 minutes",
-                    "ingredients": ["Paneer", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Garam Masala", "Butter", "Cream", "Coriander Leaves"],
-                    "instructions": [
+            // Recipe templates for dynamic generation
+            recipeTemplates: {
+                "curry": {
+                    baseIngredients: ["Onion", "Ginger", "Garlic", "Turmeric Powder"],
+                    optionalIngredients: ["Tomato", "Bell Pepper", "Spinach", "Mushroom", "Paneer", "Tofu", "Chickpeas"],
+                    spices: ["Red Chili Powder", "Coriander Powder", "Cumin Powder", "Garam Masala"],
+                    cookingSteps: [
                         "Heat oil in a pan and add finely chopped onions. Sauté until golden brown.",
                         "Add ginger-garlic paste and cook for 2 minutes until fragrant.",
                         "Add chopped tomatoes and cook until they become soft and mushy.",
                         "Add turmeric powder, red chili powder, coriander powder, and salt. Cook for 2 minutes.",
-                        "Blend the mixture to a smooth paste using a blender.",
-                        "Return the paste to the pan and add butter. Cook for 2-3 minutes.",
-                        "Add paneer cubes and cook for 5 minutes on low heat.",
-                        "Add garam masala and cream. Mix well and cook for 2 minutes.",
-                        "Garnish with fresh coriander leaves and serve hot with naan or rice."
+                        "Add main vegetables/protein and cook for 5-7 minutes on medium heat.",
+                        "Add garam masala and cook for 2 minutes.",
+                        "Garnish with fresh coriander leaves and serve hot."
                     ]
                 },
-                {
-                    "id": 2,
-                    "name": "Thai Red Curry with Tofu",
-                    "time": "25 minutes",
-                    "ingredients": ["Tofu", "Bell Pepper", "Bamboo Shoots", "Thai Red Curry Paste", "Coconut Milk", "Fish Sauce", "Palm Sugar", "Thai Basil", "Lime"],
-                    "instructions": [
-                        "Press tofu to remove excess water and cut into cubes.",
-                        "Heat oil in a wok and fry tofu until golden brown. Set aside.",
-                        "In the same wok, add red curry paste and cook for 1 minute until fragrant.",
-                        "Add coconut milk and bring to a gentle simmer.",
-                        "Add bell peppers and bamboo shoots. Cook for 3-4 minutes.",
-                        "Add fried tofu and cook for 2 minutes.",
-                        "Season with fish sauce, palm sugar, and lime juice.",
-                        "Garnish with Thai basil and serve hot with steamed rice."
-                    ]
-                },
-                {
-                    "id": 3,
-                    "name": "Quinoa Vegetable Stir Fry",
-                    "time": "20 minutes",
-                    "ingredients": ["Quinoa", "Broccoli", "Carrot", "Bell Pepper", "Ginger", "Garlic", "Soy Sauce", "Sesame Oil", "Sesame Seeds"],
-                    "instructions": [
-                        "Cook quinoa according to package instructions and set aside.",
-                        "Heat sesame oil in a large wok over high heat.",
+                "stir-fry": {
+                    baseIngredients: ["Ginger", "Garlic"],
+                    optionalIngredients: ["Bell Pepper", "Carrot", "Mushroom", "Green Beans", "Tofu"],
+                    spices: ["Black Pepper", "Soy Sauce"],
+                    cookingSteps: [
+                        "Heat oil in a wok over high heat.",
                         "Add minced ginger and garlic, stir-fry for 30 seconds.",
-                        "Add chopped vegetables (broccoli, carrot, bell pepper) and stir-fry for 3-4 minutes.",
-                        "Add cooked quinoa and soy sauce. Mix well.",
-                        "Cook for 2-3 minutes until everything is well combined.",
-                        "Garnish with sesame seeds and serve hot."
+                        "Add vegetables starting with the hardest ones (carrots, broccoli).",
+                        "Stir-fry for 2-3 minutes, then add softer vegetables.",
+                        "Add protein (if using) and cook for 2-3 minutes.",
+                        "Season with spices and soy sauce. Continue stir-frying for 2-3 minutes.",
+                        "Vegetables should be crisp-tender, not mushy. Serve immediately."
                     ]
                 },
-                {
-                    "id": 4,
-                    "name": "Dal Makhani",
-                    "time": "45 minutes",
-                    "ingredients": ["Black Lentils", "Kidney Beans", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Garam Masala", "Butter", "Cream"],
-                    "instructions": [
-                        "Soak black lentils and kidney beans overnight or for 6 hours.",
-                        "Pressure cook lentils and beans with salt and turmeric until soft.",
-                        "Heat oil in a pan and add finely chopped onions. Sauté until golden.",
+                "soup": {
+                    baseIngredients: ["Onion", "Ginger", "Garlic"],
+                    optionalIngredients: ["Carrot", "Spinach", "Mushroom", "Peas", "Lentils"],
+                    spices: ["Turmeric Powder", "Cumin Seeds", "Black Pepper"],
+                    cookingSteps: [
+                        "Heat oil in a pot and add cumin seeds. Let them crackle.",
+                        "Add finely chopped onions and cook until translucent.",
                         "Add ginger-garlic paste and cook for 2 minutes.",
-                        "Add chopped tomatoes and cook until soft.",
-                        "Add red chili powder and cook for 1 minute.",
-                        "Add cooked lentils and beans. Mix well and simmer for 10 minutes.",
-                        "Add butter, cream, and garam masala. Cook for 5 minutes.",
-                        "Garnish with fresh coriander and serve with rice or naan."
+                        "Add chopped vegetables and cook for 2-3 minutes.",
+                        "Add lentils (if using) and turmeric powder.",
+                        "Add water and bring to boil. Simmer for 20-25 minutes.",
+                        "Season with salt and pepper. Garnish with fresh herbs and serve hot."
                     ]
                 },
-                {
-                    "id": 5,
-                    "name": "Vegetable Biryani",
-                    "time": "40 minutes",
-                    "ingredients": ["Basmati Rice", "Mixed Vegetables", "Onion", "Ginger", "Garlic", "Biryani Masala", "Saffron", "Mint Leaves", "Coriander Leaves", "Ghee"],
-                    "instructions": [
-                        "Soak basmati rice for 30 minutes and saffron in warm milk.",
-                        "Heat ghee in a heavy-bottomed pan and add whole spices.",
+                "rice": {
+                    baseIngredients: ["Onion", "Ginger", "Garlic"],
+                    optionalIngredients: ["Carrot", "Bell Pepper", "Peas", "Mushroom"],
+                    spices: ["Turmeric Powder", "Cumin Seeds", "Bay Leaves", "Cardamom"],
+                    cookingSteps: [
+                        "Soak rice for 30 minutes and drain.",
+                        "Heat oil in a heavy-bottomed pan and add whole spices.",
                         "Add sliced onions and cook until golden brown.",
                         "Add ginger-garlic paste and cook for 2 minutes.",
-                        "Add mixed vegetables and biryani masala. Cook for 5 minutes.",
-                        "Add soaked rice and saffron milk. Mix gently.",
+                        "Add vegetables and turmeric powder. Cook for 3-4 minutes.",
+                        "Add soaked rice and mix gently.",
                         "Add water (1:1.5 ratio) and bring to boil.",
                         "Cover and cook on low heat for 20 minutes until rice is done.",
-                        "Garnish with mint and coriander leaves. Serve hot."
+                        "Let it rest for 5 minutes before serving."
                     ]
                 },
-                {
-                    "id": 6,
-                    "name": "Chickpea Curry",
-                    "time": "25 minutes",
-                    "ingredients": ["Chickpeas", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Coriander Powder", "Cumin Powder", "Garam Masala", "Coriander Leaves"],
-                    "instructions": [
+                "dal": {
+                    baseIngredients: ["Onion", "Ginger", "Garlic", "Turmeric Powder"],
+                    optionalIngredients: ["Tomato", "Spinach", "Lentils", "Masoor Dal", "Toor Dal"],
+                    spices: ["Cumin Seeds", "Red Chili Powder", "Coriander Powder", "Garam Masala"],
+                    cookingSteps: [
+                        "Rinse lentils thoroughly and set aside.",
                         "Heat oil in a pan and add cumin seeds. Let them crackle.",
                         "Add finely chopped onions and cook until translucent.",
                         "Add ginger-garlic paste and cook for 2 minutes.",
                         "Add chopped tomatoes and cook until soft.",
-                        "Add turmeric powder, coriander powder, and salt. Cook for 2 minutes.",
-                        "Add cooked chickpeas and mix well.",
-                        "Add water and simmer for 10 minutes.",
+                        "Add lentils, turmeric powder, and salt.",
+                        "Add water and bring to boil. Simmer for 20-25 minutes.",
                         "Add garam masala and cook for 2 minutes.",
                         "Garnish with fresh coriander and serve with rice or bread."
                     ]
-                },
-                {
-                    "id": 7,
-                    "name": "Mushroom Masala",
-                    "time": "20 minutes",
-                    "ingredients": ["Mushroom", "Onion", "Tomato", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Coriander Powder", "Garam Masala", "Coriander Leaves"],
-                    "instructions": [
-                        "Clean and slice mushrooms. Keep aside.",
-                        "Heat oil in a pan and add finely chopped onions.",
-                        "Sauté until onions become translucent.",
-                        "Add ginger-garlic paste and cook for 2 minutes.",
-                        "Add chopped tomatoes and cook until soft.",
-                        "Add turmeric powder, red chili powder, coriander powder, and salt.",
-                        "Add sliced mushrooms and cook for 5-7 minutes.",
-                        "Add garam masala and cook for 2 minutes.",
-                        "Garnish with fresh coriander and serve hot."
-                    ]
-                },
-                {
-                    "id": 8,
-                    "name": "Spinach and Paneer Curry",
-                    "time": "25 minutes",
-                    "ingredients": ["Spinach", "Paneer", "Onion", "Ginger", "Garlic", "Turmeric Powder", "Red Chili Powder", "Garam Masala", "Cream"],
-                    "instructions": [
-                        "Blanch spinach in hot water for 2 minutes and blend to a smooth paste.",
-                        "Heat oil in a pan and add finely chopped onions.",
-                        "Sauté until onions become golden brown.",
-                        "Add ginger-garlic paste and cook for 2 minutes.",
-                        "Add spinach paste and cook for 5 minutes.",
-                        "Add turmeric powder, red chili powder, and salt.",
-                        "Add paneer cubes and cook for 3-4 minutes.",
-                        "Add garam masala and cream. Mix well.",
-                        "Cook for 2 minutes and serve hot with rice or roti."
-                    ]
-                },
-                {
-                    "id": 9,
-                    "name": "Vegetable Stir Fry",
-                    "time": "15 minutes",
-                    "ingredients": ["Broccoli", "Carrot", "Bell Pepper", "Mushroom", "Ginger", "Garlic", "Soy Sauce", "Sesame Oil", "Sesame Seeds"],
-                    "instructions": [
-                        "Cut all vegetables into similar-sized pieces.",
-                        "Heat sesame oil in a wok over high heat.",
-                        "Add minced ginger and garlic, stir-fry for 30 seconds.",
-                        "Add vegetables starting with the hardest ones (carrots, broccoli).",
-                        "Stir-fry for 2-3 minutes, then add softer vegetables.",
-                        "Add soy sauce and continue stir-frying for 2-3 minutes.",
-                        "Vegetables should be crisp-tender, not mushy.",
-                        "Garnish with sesame seeds and serve immediately."
-                    ]
-                },
-                {
-                    "id": 10,
-                    "name": "Lentil Soup",
-                    "time": "30 minutes",
-                    "ingredients": ["Red Lentils", "Onion", "Carrot", "Ginger", "Garlic", "Turmeric Powder", "Cumin Seeds", "Coriander Leaves", "Lemon"],
-                    "instructions": [
-                        "Rinse red lentils thoroughly and set aside.",
-                        "Heat oil in a pot and add cumin seeds. Let them crackle.",
-                        "Add finely chopped onions and cook until translucent.",
-                        "Add ginger-garlic paste and cook for 2 minutes.",
-                        "Add chopped carrots and cook for 2 minutes.",
-                        "Add lentils, turmeric powder, and salt.",
-                        "Add water and bring to boil. Simmer for 20 minutes.",
-                        "Blend partially for a creamy texture.",
-                        "Garnish with coriander leaves and lemon juice. Serve hot."
-                    ]
                 }
-            ]
+            },
+            // Recipe names for dynamic generation
+            recipeNames: {
+                "curry": ["{protein} Curry", "{vegetable} Masala", "{protein} {spice} Curry", "Mixed Vegetable Curry"],
+                "stir-fry": ["{vegetable} Stir Fry", "Asian {vegetable} Stir Fry", "Quick {vegetable} Stir Fry", "Mixed Vegetable Stir Fry"],
+                "soup": ["{vegetable} Soup", "Hearty {vegetable} Soup", "Spiced {vegetable} Soup", "Mixed Vegetable Soup"],
+                "rice": ["{vegetable} Rice", "Spiced {vegetable} Rice", "Mixed Vegetable Rice", "Aromatic {vegetable} Rice"],
+                "dal": ["{protein} Dal", "Spiced {protein} Dal", "Mixed {protein} Dal", "Traditional {protein} Dal"]
+            }
         };
 
         class RecipeApp {
@@ -301,6 +218,8 @@
                 this.recipes = [];
                 this.currentRecipeIndex = 0;
                 this.ingredients = APP_DATA.ingredients;
+                this.recipeTemplates = APP_DATA.recipeTemplates;
+                this.recipeNames = APP_DATA.recipeNames;
                 
                 this.init();
             }
@@ -531,7 +450,7 @@
                 
                 // Simulate loading delay
                 setTimeout(() => {
-                    this.recipes = this.findRecipesByIngredients(this.selectedIngredients);
+                    this.recipes = this.generateRecipesFromIngredients(this.selectedIngredients);
                     
                     if (this.recipes.length === 0) {
                         alert('No recipes found with the selected ingredients. Try selecting different ingredients.');
@@ -545,31 +464,155 @@
                 }, 1000);
             }
 
-            findRecipesByIngredients(selectedIngredients) {
-                const matchingRecipes = [];
+            generateRecipesFromIngredients(selectedIngredients) {
+                const generatedRecipes = [];
+                const recipeTypes = Object.keys(this.recipeTemplates);
                 
-                APP_DATA.recipes.forEach(recipe => {
-                    const recipeIngredients = recipe.ingredients.map(ingredient => ingredient.toLowerCase());
-                    const selectedIngredientsLower = selectedIngredients.map(ingredient => ingredient.toLowerCase());
-                    
-                    let matchingCount = 0;
-                    selectedIngredientsLower.forEach(ingredient => {
-                        if (recipeIngredients.includes(ingredient)) {
-                            matchingCount++;
-                        }
-                    });
-                    
-                    // Recipe matches if it contains at least 2 selected ingredients
-                    if (matchingCount >= 2) {
-                        recipe.matchScore = matchingCount;
-                        matchingRecipes.push(recipe);
+                // Generate 3-5 unique recipes based on selected ingredients
+                const numRecipes = Math.min(5, Math.max(3, Math.floor(selectedIngredients.length / 2)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    const recipeType = recipeTypes[Math.floor(Math.random() * recipeTypes.length)];
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe) {
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // Add base ingredients if available
+                template.baseIngredients.forEach(ingredient => {
+                    if (availableIngredients.includes(ingredient)) {
+                        recipeIngredients.push(ingredient);
+                        availableIngredients.splice(availableIngredients.indexOf(ingredient), 1);
                     }
                 });
                 
-                // Sort by match score (highest first)
-                matchingRecipes.sort((a, b) => b.matchScore - a.matchScore);
+                // Add optional ingredients (2-4 items)
+                const numOptional = Math.min(3, availableIngredients.length);
+                const shuffledOptional = this.shuffleArray([...availableIngredients]);
                 
-                return matchingRecipes;
+                for (let i = 0; i < numOptional && i < shuffledOptional.length; i++) {
+                    recipeIngredients.push(shuffledOptional[i]);
+                }
+                
+                // Add some spices if not enough ingredients
+                if (recipeIngredients.length < 4) {
+                    const availableSpices = selectedIngredients.filter(ingredient => 
+                        this.ingredients.spices.includes(ingredient)
+                    );
+                    const spicesToAdd = Math.min(2, availableSpices.length);
+                    for (let i = 0; i < spicesToAdd; i++) {
+                        if (!recipeIngredients.includes(availableSpices[i])) {
+                            recipeIngredients.push(availableSpices[i]);
+                        }
+                    }
+                }
+                
+                // Generate recipe name
+                const recipeName = this.generateRecipeName(recipeType, recipeIngredients);
+                
+                // Generate cooking time based on ingredients
+                const cookingTime = this.generateCookingTime(recipeType, recipeIngredients.length);
+                
+                // Generate instructions
+                const instructions = this.generateInstructions(template, recipeIngredients);
+                
+                return {
+                    id: Date.now() + recipeIndex,
+                    name: recipeName,
+                    time: cookingTime,
+                    ingredients: recipeIngredients,
+                    instructions: instructions,
+                    type: recipeType
+                };
+            }
+
+            generateRecipeName(recipeType, ingredients) {
+                const nameTemplates = this.recipeNames[recipeType];
+                const template = nameTemplates[Math.floor(Math.random() * nameTemplates.length)];
+                
+                // Find main ingredients for naming
+                const vegetables = ingredients.filter(ingredient => 
+                    this.ingredients.vegetables.includes(ingredient)
+                );
+                const proteins = ingredients.filter(ingredient => 
+                    this.ingredients.protein.includes(ingredient)
+                );
+                const spices = ingredients.filter(ingredient => 
+                    this.ingredients.spices.includes(ingredient)
+                );
+                
+                let name = template;
+                
+                // Replace placeholders
+                if (name.includes('{vegetable}') && vegetables.length > 0) {
+                    name = name.replace('{vegetable}', vegetables[0]);
+                }
+                if (name.includes('{protein}') && proteins.length > 0) {
+                    name = name.replace('{protein}', proteins[0]);
+                }
+                if (name.includes('{spice}') && spices.length > 0) {
+                    name = name.replace('{spice}', spices[0]);
+                }
+                
+                return name;
+            }
+
+            generateCookingTime(recipeType, numIngredients) {
+                const baseTime = {
+                    'curry': 25,
+                    'stir-fry': 15,
+                    'soup': 30,
+                    'rice': 35,
+                    'dal': 30
+                };
+                
+                const base = baseTime[recipeType] || 25;
+                const additionalTime = Math.floor(numIngredients / 2) * 5;
+                const totalMinutes = base + additionalTime;
+                
+                return `${totalMinutes} minutes`;
+            }
+
+            generateInstructions(template, ingredients) {
+                const instructions = [...template.cookingSteps];
+                
+                // Customize instructions based on ingredients
+                const hasPaneer = ingredients.includes('Paneer');
+                const hasTofu = ingredients.includes('Tofu');
+                const hasLentils = ingredients.some(ingredient => 
+                    ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'].includes(ingredient)
+                );
+                
+                // Modify instructions based on protein
+                if (hasPaneer) {
+                    instructions.splice(4, 0, "Add paneer cubes and cook for 3-4 minutes until slightly browned.");
+                } else if (hasTofu) {
+                    instructions.splice(4, 0, "Add tofu cubes and cook for 3-4 minutes until slightly crispy.");
+                } else if (hasLentils) {
+                    instructions.splice(4, 0, "Add lentils and cook for 5-7 minutes until soft.");
+                }
+                
+                return instructions;
+            }
+
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
             }
 
             renderRecipes() {
