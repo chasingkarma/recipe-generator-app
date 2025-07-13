@@ -3711,4 +3711,3044 @@
                     'Cumin Powder': ['curry', 'dal'],
                     'Garam Masala': ['curry', 'dal'],
                     'Black Pepper': ['stir-fry', 'soup'],
-                    '
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Garlic': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup', 'stir-fry'],
+                    'Turmeric Powder': ['curry', 'poha', 'rice', 'dal', 'soup'],
+                    'Red Chili Powder': ['curry', 'dal'],
+                    'Coriander Powder': ['curry', 'dal'],
+                    'Cumin Powder': ['curry', 'dal'],
+                    'Garam Masala': ['curry', 'dal'],
+                    'Black Pepper': ['stir-fry', 'soup'],
+                    'Cumin Seeds': ['poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Mustard Seeds': ['poha', 'upma', 'idli', 'dosa'],
+                    'Curry Leaves': ['poha', 'upma', 'idli', 'dosa'],
+                    'Asafoetida': ['poha', 'upma', 'idli', 'dosa']
+                };
+                
+                // Score recipe types based on selected ingredients
+                selectedIngredients.forEach(ingredient => {
+                    const recipeTypes = ingredientToRecipeTypes[ingredient] || [];
+                    recipeTypes.forEach(recipeType => {
+                        recipeTypeScores[recipeType] = (recipeTypeScores[recipeType] || 0) + 1;
+                    });
+                });
+                
+                // Sort recipe types by score (highest first)
+                const sortedRecipeTypes = Object.entries(recipeTypeScores)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([recipeType]) => recipeType);
+                
+                // If no specific matches, include all recipe types with lower priority
+                const allRecipeTypes = Object.keys(this.recipeTemplates);
+                const remainingTypes = allRecipeTypes.filter(type => !sortedRecipeTypes.includes(type));
+                
+                const result = [...sortedRecipeTypes, ...remainingTypes];
+                console.log('Recipe type scores:', recipeTypeScores);
+                console.log('Prioritized recipe types:', result);
+                return result;
+            }
+
+            getKeyIngredientsForRecipeType(recipeType) {
+                // Define key ingredients for each recipe type
+                const keyIngredients = {
+                    'poha': ['Poha'],
+                    'upma': ['Semolina'],
+                    'rice': ['Basmati Rice', 'Brown Rice', 'Quinoa'],
+                    'paratha': ['Whole Wheat Flour'],
+                    'idli': ['Urad Dal', 'Rice'],
+                    'dosa': ['Urad Dal', 'Rice'],
+                    'curry': ['Onion', 'Ginger', 'Garlic'],
+                    'dal': ['Lentils', 'Masoor Dal', 'Toor Dal', 'Chana Dal', 'Urad Dal'],
+                    'stir-fry': ['Ginger', 'Garlic'],
+                    'soup': ['Onion', 'Ginger', 'Garlic']
+                };
+                
+                return keyIngredients[recipeType] || [];
+            }
+
+            generateRecipe(recipeType, selectedIngredients, recipeIndex) {
+                const template = this.recipeTemplates[recipeType];
+                const availableIngredients = [...selectedIngredients];
+                
+                console.log(`Generating ${recipeType} recipe with ingredients:`, selectedIngredients);
+                
+                // Determine recipe ingredients based on template and available ingredients
+                const recipeIngredients = [];
+                
+                // First, prioritize ingredients that are key for this recipe type
+                const keyIngredients = this.getKeyIngredientsForRecipeType(recipeType);
+                
+                // Generate recipes based on selected ingredients
+                const numRecipes = Math.min(CONFIG.MAX_GENERATED_RECIPES, Math.max(2, Math.floor(selectedIngredients.length / 3)));
+                
+                for (let i = 0; i < numRecipes; i++) {
+                    // Use prioritized recipe types, fallback to random if needed
+                    const recipeType = prioritizedRecipeTypes[i] || 
+                                     prioritizedRecipeTypes[Math.floor(Math.random() * prioritizedRecipeTypes.length)];
+                    
+                    const recipe = this.generateRecipe(recipeType, selectedIngredients, i);
+                    if (recipe && recipe.ingredients.length >= 4) {
+                        // Check for placeholders in the name and skip if not resolvable
+                        if ((recipe.name.includes('{vegetable}') && !recipe.ingredients.some(ing => this.ingredients.vegetables.includes(ing))) ||
+                            (recipe.name.includes('{protein}') && !recipe.ingredients.some(ing => this.ingredients.protein.includes(ing)))) {
+                            continue;
+                        }
+                        
+                        // Check if recipe violates dietary restrictions
+                        if (dietaryRestrictions.length > 0 && this.recipeViolatesRestriction(recipe, dietaryRestrictions.join(' '))) {
+                            continue;
+                        }
+                        
+                        generatedRecipes.push(recipe);
+                    }
+                }
+                
+                return generatedRecipes;
+            }
+
+            getPrioritizedRecipeTypes(selectedIngredients) {
+                const recipeTypeScores = {};
+                
+                // Define ingredient-to-recipe-type mappings
+                const ingredientToRecipeTypes = {
+                    'Poha': ['poha'],
+                    'Semolina': ['upma'],
+                    'Basmati Rice': ['rice'],
+                    'Brown Rice': ['rice'],
+                    'Quinoa': ['rice'],
+                    'Whole Wheat Flour': ['paratha'],
+                    'Urad Dal': ['idli', 'dosa'],
+                    'Rice': ['idli', 'dosa'],
+                    'Paneer': ['curry', 'paratha'],
+                    'Tofu': ['curry', 'stir-fry'],
+                    'Chickpeas': ['curry'],
+                    'Lentils': ['dal'],
+                    'Masoor Dal': ['dal'],
+                    'Toor Dal': ['dal'],
+                    'Chana Dal': ['dal'],
+                    'Kidney Beans': ['curry'],
+                    'Onion': ['curry', 'poha', 'upma', 'rice', 'dal', 'soup'],
+                    'Tomato': ['curry', 'dal', 'soup'],
+                    'Potato': ['curry', 'paratha', 'dosa'],
+                    'Carrot': ['poha', 'upma', 'rice', 'stir-fry', 'soup'],
+                    'Bell Pepper': ['curry', 'poha', 'upma', 'stir-fry', 'rice'],
+                    'Spinach': ['curry', 'dal', 'paratha'],
+                    'Cauliflower': ['curry', 'paratha'],
+                    'Green Beans': ['curry', 'stir-fry'],
+                    'Peas': ['poha', 'upma', 'rice'],
+                    'Mushroom': ['curry', 'stir-fry', 'soup'],
+                    'Eggplant': ['curry'],
+                    'Ginger': ['curry', 'poha', 'upma', 'rice
