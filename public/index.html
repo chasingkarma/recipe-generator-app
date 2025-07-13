@@ -120,7 +120,8 @@
             MAX_API_RECIPES: 5, // Maximum number of API recipes to fetch
             MAX_GENERATED_RECIPES: 3, // Maximum number of generated recipes
             FORCE_AI_RECIPES: false, // Set to true to prioritize AI recipes over API
-            DEBUG_MODE: true // Enable console logging for debugging
+            DEBUG_MODE: true, // Enable console logging for debugging
+            SHOW_NUTRITION_FACTS: true // Enable nutrition facts display
         };
 
         // Dynamic recipe generation system
@@ -140,6 +141,62 @@
                 "protein": [
                     "Paneer", "Tofu", "Chickpeas", "Masoor Dal", "Toor Dal", "Chana Dal", "Urad Dal", "Kidney Beans", "Lentils"
                 ]
+            },
+            // Nutrition data per 100g of ingredient
+            nutritionData: {
+                // Vegetables (per 100g)
+                "Onion": { calories: 40, fat: 0.1, cholesterol: 0, sodium: 4, carbs: 9.3, fiber: 1.7, sugar: 4.7, protein: 1.1 },
+                "Tomato": { calories: 18, fat: 0.2, cholesterol: 0, sodium: 5, carbs: 3.9, fiber: 1.2, sugar: 2.6, protein: 0.9 },
+                "Potato": { calories: 77, fat: 0.1, cholesterol: 0, sodium: 6, carbs: 17, fiber: 2.2, sugar: 0.8, protein: 2 },
+                "Carrot": { calories: 41, fat: 0.2, cholesterol: 0, sodium: 69, carbs: 9.6, fiber: 2.8, sugar: 4.7, protein: 0.9 },
+                "Bell Pepper": { calories: 20, fat: 0.2, cholesterol: 0, sodium: 4, carbs: 4.6, fiber: 1.7, sugar: 2.4, protein: 0.9 },
+                "Spinach": { calories: 23, fat: 0.4, cholesterol: 0, sodium: 79, carbs: 3.6, fiber: 2.2, sugar: 0.4, protein: 2.9 },
+                "Cauliflower": { calories: 25, fat: 0.3, cholesterol: 0, sodium: 30, carbs: 5, fiber: 2, sugar: 1.9, protein: 1.9 },
+                "Green Beans": { calories: 31, fat: 0.2, cholesterol: 0, sodium: 6, carbs: 7, fiber: 2.7, sugar: 3.3, protein: 1.8 },
+                "Peas": { calories: 84, fat: 0.4, cholesterol: 0, sodium: 5, carbs: 14, fiber: 5.7, sugar: 5.7, protein: 5.4 },
+                "Mushroom": { calories: 22, fat: 0.3, cholesterol: 0, sodium: 5, carbs: 3.3, fiber: 1, sugar: 1.7, protein: 3.1 },
+                "Eggplant": { calories: 25, fat: 0.2, cholesterol: 0, sodium: 2, carbs: 6, fiber: 3, sugar: 3.5, protein: 1 },
+                "Ginger": { calories: 80, fat: 0.8, cholesterol: 0, sodium: 13, carbs: 17.8, fiber: 2, sugar: 1.7, protein: 1.8 },
+                "Garlic": { calories: 149, fat: 0.5, cholesterol: 0, sodium: 17, carbs: 33.1, fiber: 2.1, sugar: 1, protein: 6.4 },
+                "Coriander Leaves": { calories: 23, fat: 0.5, cholesterol: 0, sodium: 46, carbs: 3.7, fiber: 2.8, sugar: 0.9, protein: 2.1 },
+                "Mint Leaves": { calories: 44, fat: 0.7, cholesterol: 0, sodium: 31, carbs: 8.4, fiber: 6.8, sugar: 0.2, protein: 3.8 },
+                "Curry Leaves": { calories: 108, fat: 1.3, cholesterol: 0, sodium: 103, carbs: 18.7, fiber: 12.3, sugar: 0.4, protein: 16.1 },
+                
+                // Spices (per 100g)
+                "Turmeric Powder": { calories: 354, fat: 10, cholesterol: 0, sodium: 20, carbs: 65, fiber: 21, sugar: 3.2, protein: 8 },
+                "Red Chili Powder": { calories: 282, fat: 12, cholesterol: 0, sodium: 1680, carbs: 49, fiber: 34, sugar: 7.2, protein: 12 },
+                "Coriander Powder": { calories: 279, fat: 8.6, cholesterol: 0, sodium: 35, carbs: 52, fiber: 27, sugar: 7.3, protein: 12 },
+                "Cumin Powder": { calories: 375, fat: 22, cholesterol: 0, sodium: 168, carbs: 44, fiber: 11, sugar: 2.3, protein: 18 },
+                "Garam Masala": { calories: 315, fat: 12, cholesterol: 0, sodium: 45, carbs: 58, fiber: 25, sugar: 3.2, protein: 13 },
+                "Black Pepper": { calories: 251, fat: 3.3, cholesterol: 0, sodium: 20, carbs: 64, fiber: 25, sugar: 0.6, protein: 10 },
+                "Cumin Seeds": { calories: 375, fat: 22, cholesterol: 0, sodium: 168, carbs: 44, fiber: 11, sugar: 2.3, protein: 18 },
+                "Mustard Seeds": { calories: 508, fat: 36, cholesterol: 0, sodium: 5, carbs: 28, fiber: 12, sugar: 6.8, protein: 26 },
+                "Fenugreek Seeds": { calories: 323, fat: 6.4, cholesterol: 0, sodium: 67, carbs: 58, fiber: 25, sugar: 0, protein: 23 },
+                "Asafoetida": { calories: 297, fat: 1.1, cholesterol: 0, sodium: 3, carbs: 68, fiber: 4.4, sugar: 0, protein: 4 },
+                "Cardamom": { calories: 311, fat: 6.7, cholesterol: 0, sodium: 18, carbs: 68, fiber: 28, sugar: 0, protein: 11 },
+                "Cinnamon": { calories: 247, fat: 1.2, cholesterol: 0, sodium: 10, carbs: 81, fiber: 54, sugar: 2.2, protein: 4 },
+                "Cloves": { calories: 274, fat: 13, cholesterol: 0, sodium: 277, carbs: 66, fiber: 34, sugar: 2.4, protein: 6 },
+                "Bay Leaves": { calories: 313, fat: 8.4, cholesterol: 0, sodium: 23, carbs: 75, fiber: 26, sugar: 0, protein: 8 },
+                
+                // Grains (per 100g)
+                "Basmati Rice": { calories: 130, fat: 0.3, cholesterol: 0, sodium: 1, carbs: 28, fiber: 0.4, sugar: 0.1, protein: 2.7 },
+                "Brown Rice": { calories: 111, fat: 0.9, cholesterol: 0, sodium: 5, carbs: 23, fiber: 1.8, sugar: 0.4, protein: 2.6 },
+                "Quinoa": { calories: 120, fat: 1.9, cholesterol: 0, sodium: 7, carbs: 22, fiber: 2.8, sugar: 0.9, protein: 4.4 },
+                "Whole Wheat Flour": { calories: 340, fat: 2, cholesterol: 0, sodium: 2, carbs: 72, fiber: 13, sugar: 0.4, protein: 13 },
+                "Semolina": { calories: 360, fat: 1.1, cholesterol: 0, sodium: 1, carbs: 73, fiber: 3.6, sugar: 0.3, protein: 13 },
+                "Poha": { calories: 360, fat: 1.1, cholesterol: 0, sodium: 1, carbs: 73, fiber: 3.6, sugar: 0.3, protein: 13 },
+                "Puffed Rice": { calories: 383, fat: 0.5, cholesterol: 0, sodium: 4, carbs: 87, fiber: 1.4, sugar: 0.2, protein: 6.7 },
+                
+                // Protein (per 100g)
+                "Paneer": { calories: 265, fat: 20, cholesterol: 72, sodium: 16, carbs: 2.7, fiber: 0, sugar: 2.7, protein: 18 },
+                "Tofu": { calories: 76, fat: 4.8, cholesterol: 0, sodium: 7, carbs: 1.9, fiber: 0.3, sugar: 0.6, protein: 8.1 },
+                "Chickpeas": { calories: 164, fat: 2.6, cholesterol: 0, sodium: 7, carbs: 27, fiber: 7.6, sugar: 4.8, protein: 8.9 },
+                "Masoor Dal": { calories: 116, fat: 0.4, cholesterol: 0, sodium: 2, carbs: 20, fiber: 7.9, sugar: 1.8, protein: 9 },
+                "Toor Dal": { calories: 343, fat: 1.5, cholesterol: 0, sodium: 2, carbs: 63, fiber: 15, sugar: 2, protein: 22 },
+                "Chana Dal": { calories: 364, fat: 6.7, cholesterol: 0, sodium: 10, carbs: 61, fiber: 17, sugar: 6, protein: 21 },
+                "Urad Dal": { calories: 341, fat: 1.6, cholesterol: 0, sodium: 38, carbs: 59, fiber: 18, sugar: 0, protein: 25 },
+                "Kidney Beans": { calories: 127, fat: 0.5, cholesterol: 0, sodium: 1, carbs: 23, fiber: 6.4, sugar: 0.3, protein: 8.7 },
+                "Lentils": { calories: 116, fat: 0.4, cholesterol: 0, sodium: 2, carbs: 20, fiber: 7.9, sugar: 1.8, protein: 9 }
             },
             // Recipe templates for dynamic generation
             recipeTemplates: {
@@ -732,7 +789,7 @@
                     image: spoonacularRecipe.image,
                     category: spoonacularRecipe.cuisines ? spoonacularRecipe.cuisines[0] : '',
                     servings: spoonacularRecipe.servings,
-                    nutrition: spoonacularRecipe.nutrition
+                    nutrition: this.convertSpoonacularNutrition(spoonacularRecipe.nutrition)
                 };
             }
 
@@ -764,6 +821,55 @@
                 const baseTime = 20;
                 const additionalTime = Math.floor(numIngredients / 3) * 10;
                 return `${baseTime + additionalTime} minutes`;
+            }
+
+            convertSpoonacularNutrition(spoonacularNutrition) {
+                if (!spoonacularNutrition || !spoonacularNutrition.nutrients) {
+                    return null;
+                }
+                
+                const nutrition = {
+                    calories: 0,
+                    fat: 0,
+                    cholesterol: 0,
+                    sodium: 0,
+                    carbs: 0,
+                    fiber: 0,
+                    sugar: 0,
+                    protein: 0
+                };
+                
+                // Map Spoonacular nutrition data to our format
+                spoonacularNutrition.nutrients.forEach(nutrient => {
+                    switch (nutrient.name.toLowerCase()) {
+                        case 'calories':
+                            nutrition.calories = Math.round(nutrient.amount);
+                            break;
+                        case 'fat':
+                            nutrition.fat = Math.round(nutrient.amount * 10) / 10;
+                            break;
+                        case 'cholesterol':
+                            nutrition.cholesterol = Math.round(nutrient.amount);
+                            break;
+                        case 'sodium':
+                            nutrition.sodium = Math.round(nutrient.amount);
+                            break;
+                        case 'carbohydrates':
+                            nutrition.carbs = Math.round(nutrient.amount * 10) / 10;
+                            break;
+                        case 'fiber':
+                            nutrition.fiber = Math.round(nutrient.amount * 10) / 10;
+                            break;
+                        case 'sugar':
+                            nutrition.sugar = Math.round(nutrient.amount * 10) / 10;
+                            break;
+                        case 'protein':
+                            nutrition.protein = Math.round(nutrient.amount * 10) / 10;
+                            break;
+                    }
+                });
+                
+                return nutrition;
             }
 
             getDietaryRestrictions() {
@@ -1007,6 +1113,9 @@
                 // Generate instructions
                 const instructions = this.generateInstructions(template, recipeIngredients);
                 
+                // Calculate nutrition facts
+                const nutrition = this.calculateRecipeNutrition(recipeIngredients);
+                
                 return {
                     id: Date.now() + recipeIndex,
                     name: recipeName,
@@ -1019,7 +1128,8 @@
                     instructions: instructions,
                     type: 'generated',
                     source: 'AI Generated',
-                    recipeType: recipeType
+                    recipeType: recipeType,
+                    nutrition: nutrition
                 };
             }
 
@@ -1117,6 +1227,182 @@
                 return shuffled;
             }
 
+            calculateRecipeNutrition(ingredients) {
+                const nutrition = {
+                    calories: 0,
+                    fat: 0,
+                    cholesterol: 0,
+                    sodium: 0,
+                    carbs: 0,
+                    fiber: 0,
+                    sugar: 0,
+                    protein: 0
+                };
+                
+                // Calculate nutrition per serving (assuming 4 servings per recipe)
+                const servingsPerRecipe = 4;
+                const gramsPerServing = 150; // Average serving size
+                
+                ingredients.forEach(ingredient => {
+                    const nutritionData = this.nutritionData[ingredient];
+                    if (nutritionData) {
+                        // Estimate ingredient weight based on recipe type and ingredient importance
+                        let ingredientWeight = this.estimateIngredientWeight(ingredient, ingredients.length);
+                        
+                        // Add nutrition contribution
+                        nutrition.calories += (nutritionData.calories * ingredientWeight) / 100;
+                        nutrition.fat += (nutritionData.fat * ingredientWeight) / 100;
+                        nutrition.cholesterol += (nutritionData.cholesterol * ingredientWeight) / 100;
+                        nutrition.sodium += (nutritionData.sodium * ingredientWeight) / 100;
+                        nutrition.carbs += (nutritionData.carbs * ingredientWeight) / 100;
+                        nutrition.fiber += (nutritionData.fiber * ingredientWeight) / 100;
+                        nutrition.sugar += (nutritionData.sugar * ingredientWeight) / 100;
+                        nutrition.protein += (nutritionData.protein * ingredientWeight) / 100;
+                    }
+                });
+                
+                // Round to 1 decimal place
+                Object.keys(nutrition).forEach(key => {
+                    nutrition[key] = Math.round(nutrition[key] * 10) / 10;
+                });
+                
+                return nutrition;
+            }
+
+            estimateIngredientWeight(ingredient, totalIngredients) {
+                // Base weights for different ingredient categories
+                const baseWeights = {
+                    // Main ingredients (higher weight)
+                    'Basmati Rice': 50,
+                    'Brown Rice': 50,
+                    'Quinoa': 50,
+                    'Whole Wheat Flour': 60,
+                    'Semolina': 60,
+                    'Poha': 60,
+                    'Paneer': 40,
+                    'Tofu': 40,
+                    'Chickpeas': 45,
+                    'Lentils': 45,
+                    'Masoor Dal': 45,
+                    'Toor Dal': 45,
+                    'Chana Dal': 45,
+                    'Urad Dal': 45,
+                    'Kidney Beans': 45,
+                    
+                    // Vegetables (medium weight)
+                    'Onion': 30,
+                    'Tomato': 25,
+                    'Potato': 35,
+                    'Carrot': 25,
+                    'Bell Pepper': 25,
+                    'Spinach': 20,
+                    'Cauliflower': 30,
+                    'Green Beans': 25,
+                    'Peas': 25,
+                    'Mushroom': 25,
+                    'Eggplant': 30,
+                    'Ginger': 10,
+                    'Garlic': 15,
+                    'Coriander Leaves': 10,
+                    'Mint Leaves': 5,
+                    'Curry Leaves': 5,
+                    
+                    // Spices (low weight)
+                    'Turmeric Powder': 2,
+                    'Red Chili Powder': 1,
+                    'Coriander Powder': 2,
+                    'Cumin Powder': 1,
+                    'Garam Masala': 1,
+                    'Black Pepper': 1,
+                    'Cumin Seeds': 1,
+                    'Mustard Seeds': 1,
+                    'Fenugreek Seeds': 1,
+                    'Asafoetida': 1,
+                    'Cardamom': 1,
+                    'Cinnamon': 1,
+                    'Cloves': 1,
+                    'Bay Leaves': 1
+                };
+                
+                return baseWeights[ingredient] || 20; // Default weight
+            }
+
+            formatNutritionTable(nutrition) {
+                if (!nutrition || !CONFIG.SHOW_NUTRITION_FACTS) {
+                    return '';
+                }
+                
+                const dailyValues = {
+                    calories: 2000,
+                    fat: 65,
+                    cholesterol: 300,
+                    sodium: 2400,
+                    carbs: 300,
+                    fiber: 25,
+                    sugar: 50,
+                    protein: 50
+                };
+                
+                const calculateDailyValue = (value, dailyValue) => {
+                    return Math.round((value / dailyValue) * 100);
+                };
+                
+                return `
+                    <div class="nutrition-facts">
+                        <h3>Nutrition Facts</h3>
+                        <div class="nutrition-table">
+                            <div class="nutrition-header">
+                                <div class="serving-size">Serving Size: 1 serving</div>
+                                <div class="servings-per-container">Servings Per Recipe: 4</div>
+                            </div>
+                            <div class="nutrition-divider"></div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Calories</span>
+                                <span class="nutrient-value">${nutrition.calories}</span>
+                            </div>
+                            <div class="nutrition-divider"></div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Total Fat</span>
+                                <span class="nutrient-value">${nutrition.fat}g</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.fat, dailyValues.fat)}%</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Cholesterol</span>
+                                <span class="nutrient-value">${nutrition.cholesterol}mg</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.cholesterol, dailyValues.cholesterol)}%</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Sodium</span>
+                                <span class="nutrient-value">${nutrition.sodium}mg</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.sodium, dailyValues.sodium)}%</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Total Carbohydrates</span>
+                                <span class="nutrient-value">${nutrition.carbs}g</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.carbs, dailyValues.carbs)}%</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Dietary Fiber</span>
+                                <span class="nutrient-value">${nutrition.fiber}g</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.fiber, dailyValues.fiber)}%</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Sugars</span>
+                                <span class="nutrient-value">${nutrition.sugar}g</span>
+                            </div>
+                            <div class="nutrition-row">
+                                <span class="nutrient-name">Protein</span>
+                                <span class="nutrient-value">${nutrition.protein}g</span>
+                                <span class="daily-value">${calculateDailyValue(nutrition.protein, dailyValues.protein)}%</span>
+                            </div>
+                        </div>
+                        <div class="nutrition-note">
+                            * Percent Daily Values are based on a 2,000 calorie diet.
+                        </div>
+                    </div>
+                `;
+            }
+
             renderRecipes() {
                 const container = document.getElementById('recipes-container');
                 container.innerHTML = '';
@@ -1194,6 +1480,8 @@
                             ).join('')}
                         </ol>
                     </div>
+                    
+                    ${this.formatNutritionTable(recipe.nutrition)}
                     
                     <div class="recipe-navigation">
                         <button class="btn btn-secondary nav-btn" id="prev-recipe" ${index === 0 ? 'disabled' : ''}>
