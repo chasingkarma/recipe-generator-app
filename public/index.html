@@ -116,10 +116,10 @@
         // Configuration
         const CONFIG = {
             SPOONACULAR_API_KEY: 'b787ae0032a2423eb35409bb2f4f3f10', // Your Spoonacular API key
-            ENABLE_API_RECIPES: true, // Set to false to use only generated recipes
+            ENABLE_API_RECIPES: false, // Set to false to use only generated recipes (temporarily disabled)
             MAX_API_RECIPES: 5, // Maximum number of API recipes to fetch
-            MAX_GENERATED_RECIPES: 3, // Maximum number of generated recipes
-            FORCE_AI_RECIPES: false, // Set to true to prioritize AI recipes over API
+            MAX_GENERATED_RECIPES: 5, // Maximum number of generated recipes (increased)
+            FORCE_AI_RECIPES: true, // Set to true to prioritize AI recipes over API
             DEBUG_MODE: true, // Enable console logging for debugging
             SHOW_NUTRITION_FACTS: true // Enable nutrition facts display
         };
@@ -644,9 +644,15 @@
 
                 this.showLoading(true);
                 
+                // Add timeout to prevent infinite loading
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), 30000); // 30 second timeout
+                });
+                
                 try {
-                    // First, try to fetch API recipes
-                    const apiRecipes = await this.fetchApiRecipes();
+                    // First, try to fetch API recipes with timeout
+                    const apiRecipesPromise = this.fetchApiRecipes();
+                    const apiRecipes = await Promise.race([apiRecipesPromise, timeoutPromise]);
                     this.apiRecipes = apiRecipes;
                     
                     // Then generate AI recipes
@@ -717,31 +723,51 @@
                 // Try to find recipes for selected ingredients
                 try {
                     const ingredients = this.selectedIngredients.join(',');
+                    console.log('Fetching Spoonacular recipes for ingredients:', ingredients);
+                    
                     const response = await fetch(`https://api.spoonacular.com/recipes/findByIngredients?apiKey=${CONFIG.SPOONACULAR_API_KEY}&ingredients=${encodeURIComponent(ingredients)}&number=10&ranking=2&ignorePantry=true`);
+                    
+                    if (!response.ok) {
+                        console.error('Spoonacular API error:', response.status, response.statusText);
+                        return apiRecipes;
+                    }
+                    
                     const data = await response.json();
+                    console.log('Spoonacular API response:', data);
                     
                     if (data && data.length > 0) {
                         // Get detailed recipe for each result
                         for (const recipe of data.slice(0, CONFIG.MAX_API_RECIPES)) {
                             try {
+                                console.log('Fetching details for recipe:', recipe.id);
                                 const detailResponse = await fetch(`https://api.spoonacular.com/recipes/${recipe.id}/information?apiKey=${CONFIG.SPOONACULAR_API_KEY}`);
+                                
+                                if (!detailResponse.ok) {
+                                    console.error('Error fetching recipe details:', detailResponse.status);
+                                    continue;
+                                }
+                                
                                 const detailData = await detailResponse.json();
                                 
                                 if (detailData && this.isVegetarianRecipe(detailData)) {
                                     const convertedRecipe = this.convertSpoonacularRecipeToFormat(detailData);
                                     if (convertedRecipe) {
                                         apiRecipes.push(convertedRecipe);
+                                        console.log('Added API recipe:', convertedRecipe.name);
                                     }
                                 }
                             } catch (error) {
                                 console.error('Error fetching recipe details:', error);
                             }
                         }
+                    } else {
+                        console.log('No Spoonacular recipes found for ingredients');
                     }
                 } catch (error) {
                     console.error('Error fetching Spoonacular recipes:', error);
                 }
                 
+                console.log('Total API recipes found:', apiRecipes.length);
                 return apiRecipes;
             }
 
