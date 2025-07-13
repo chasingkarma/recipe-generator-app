@@ -38,20 +38,26 @@ class RecipeService
     public function findRecipesByIngredients($selectedIngredients)
     {
         $matchingRecipes = [];
+        $vegetables = array_map('strtolower', $this->ingredients['vegetables']);
+        $proteins = array_map('strtolower', $this->ingredients['protein']);
         
         foreach ($this->recipes['recipes'] as $recipe) {
             $recipeIngredients = array_map('strtolower', $recipe['ingredients']);
             $selectedIngredientsLower = array_map('strtolower', $selectedIngredients);
             
             $matchingCount = 0;
+            $hasCore = false;
             foreach ($selectedIngredientsLower as $ingredient) {
                 if (in_array($ingredient, $recipeIngredients)) {
                     $matchingCount++;
+                    if (in_array($ingredient, $vegetables) || in_array($ingredient, $proteins)) {
+                        $hasCore = true;
+                    }
                 }
             }
             
-            // Recipe matches if it contains at least 2 selected ingredients
-            if ($matchingCount >= 2) {
+            // Recipe matches if it contains at least 3 selected ingredients and at least one is a vegetable or protein
+            if ($matchingCount >= 3 && $hasCore) {
                 $recipe['matchScore'] = $matchingCount;
                 $matchingRecipes[] = $recipe;
             }

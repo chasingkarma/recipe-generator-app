@@ -165,6 +165,21 @@
         "Blend partially for a creamy texture.",
         "Garnish with coriander leaves and lemon juice. Serve hot."
       ]
+    },
+    {
+      "id": 11,
+      "name": "Kanda Poha",
+      "time": "20 minutes",
+      "ingredients": ["Poha", "Onion", "Potato", "Peas", "Turmeric Powder", "Mustard Seeds", "Curry Leaves", "Green Chili", "Lemon", "Coriander Leaves"],
+      "instructions": [
+        "Rinse poha in water and drain. Keep aside for 10 minutes.",
+        "Heat oil in a pan and add mustard seeds. Let them crackle.",
+        "Add curry leaves and green chili. Sauté for 30 seconds.",
+        "Add chopped onions and potatoes. Cook until soft.",
+        "Add peas and turmeric powder. Mix well.",
+        "Add poha and salt. Mix gently and cook for 2-3 minutes.",
+        "Squeeze lemon juice and garnish with coriander leaves. Serve hot."
+      ]
     }
   ]
 } 
